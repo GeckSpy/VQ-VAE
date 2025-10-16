@@ -1,8 +1,9 @@
 
 
 class Arguments:
-    def __init__(self, learning_rate):
+    def __init__(self, epoches, learning_rate):
         self.learning_rate = learning_rate
+        self.epoches = epoches
 
 
 

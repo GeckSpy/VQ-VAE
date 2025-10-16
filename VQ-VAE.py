@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+
 from utils import Arguments, load_data
 
 from Models.MNIST import MNIST_paper
@@ -24,7 +25,11 @@ class Solver:
         
     
     def train(self):
-        pass
+        for epoch in range(self.args.epoches):
+            reconstruction_loss = []
+            sgz_e_loss = []
+            z_sge_loss = []
+
 
 
 
