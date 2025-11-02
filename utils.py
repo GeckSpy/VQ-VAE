@@ -14,13 +14,13 @@ class Arguments:
 
 
 
-def load_data(args:Arguments):
+def load_data(args:Arguments, force_dowload=False):
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5)),
     ])
     root = "./Datasets/"
-    if not os.path.exists(root + args.dataset_name):
+    if (not os.path.exists(root + args.dataset_name)) and (not force_dowload):
         error_str = "path to directory dataset: '" + root+args.dataset_name + "' does not exist\nPlease download dataset first"
         raise ValueError(error_str)
 
@@ -29,7 +29,7 @@ def load_data(args:Arguments):
         data = MNIST(root=root,
                      train=True,
                      transform=transform,
-                     download=True)
+                     download=force_dowload)
         
 
     loader = DataLoader(data,
@@ -41,5 +41,5 @@ def load_data(args:Arguments):
     return data, loader
         
 
-arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100)
-load_data(arg)
+#arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100)
+#load_data(arg)
