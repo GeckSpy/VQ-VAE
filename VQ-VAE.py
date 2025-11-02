@@ -3,20 +3,22 @@ import torch
 import torch.nn as nn
 
 from utils import Arguments, load_data
-
 from Models.MNIST import MNIST_paper
 
 
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Solver:
     def __init__(self, args:Arguments):
-        self.args:Arguments = args
+        self.args:Arguments = args.copy()
 
-        self.model = MNIST_paper()
+        if self.args.dataset_name == "MNIST":
+            self.model = MNIST_paper()
+        else:
+            assert ValueError("dataset " + self.args.dataset_name + " is not supported.")
 
-        self.loss = nn.MSELoss().cuda()
+        self.loss = nn.MSELoss().to(device)
         self.data, self.data_loader = load_data(args)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
@@ -24,7 +26,7 @@ class Solver:
                                           betas=(0.5,0.999))
     
 
-    
+
     def train(self):
         for epoch in range(self.args.epoches):
             reconstruction_losses = []
