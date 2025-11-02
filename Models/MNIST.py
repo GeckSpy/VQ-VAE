@@ -43,9 +43,9 @@ class MNIST_paper(nn.Module):
         """
         Maps query (encoder output) to closest embedding vector
         """
-        Q=query.unsqueeze(1).repeat(1,target.size(0),1) # Copy 
-        T=target.unsqueeze(0).repeat(query.size(0),1,1) # Copy
-        distances =(Q-T).pow(2).sum(2) # computes all pairwise distances
+        Q = query.unsqueeze(1).repeat(1,target.size(0),1) # Copy 
+        T = target.unsqueeze(0).repeat(query.size(0),1,1) # Copy
+        distances = (Q-T).pow(2).sum(2) # computes all pairwise distances
         index = distances.min(1)[1] # .min() resturn (min, indices)
         return target[index]
 
@@ -70,5 +70,4 @@ class MNIST_paper(nn.Module):
         Z_enc_for_emb = self.find_nearest(self.embeding.weight, Z_enc) # update embedding vectors
 
         return Z_dec, Z_enc, Z_dec, Z_enc_for_emb
-
 
