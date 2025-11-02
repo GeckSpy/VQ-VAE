@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 
 
 class Arguments:
+    """Class to deal all training arguments"""
     def __init__(self, epoches, learning_rate, dataset_name, batch_size, beta):
         self.learning_rate = learning_rate
         self.epoches = epoches
@@ -13,15 +14,20 @@ class Arguments:
         self.beta = beta
 
     def copy(self):
+        """Copy the arguments"""
         return Arguments(epoches=self.epoches,
                          learning_rate=self.learning_rate,
                          dataset_name=self.dataset_name,
-                         batch_size=self.batch_size)
+                         batch_size=self.batch_size,
+                         beta=self.beta)
 
 
 
 
 def load_data(args:Arguments, force_dowload=False):
+    """Load data depending of an Argument class
+    
+    Return the data and the loader"""
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5)),
