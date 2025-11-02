@@ -31,11 +31,15 @@ def load_data(args:Arguments, force_dowload=False):
         raise ValueError(error_str)
 
     if args.dataset_name == "MNIST":
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,),(0.5,)),
+        ])
         num_workers = 4
         data = MNIST(root=root,
                      train=True,
                      transform=transform,
-                     download=force_dowload)
+                     download=True)
         
 
     loader = DataLoader(data,
@@ -47,5 +51,13 @@ def load_data(args:Arguments, force_dowload=False):
     return data, loader
         
 
-#arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100)
-#load_data(arg)
+def test():
+    arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100)
+    data, loader = load_data(arg)
+
+    print(type(loader))
+    for id, (images, labels) in enumerate(loader):
+        print(images.shape, labels.shape)
+        break
+
+#test()
