@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -53,6 +54,37 @@ class Solver:
                 z_sge_losses.append(z_sge_loss)
 
 
+
+
+
+
+def save_model(path, model, optimizer=None, epoch=None, extra=None):
+    """Save state dict and optimizer (optional)."""
+    root = "./saves"
+    if not os.path.exists(root):
+        raise ValueError("Wrong root.")
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    ckpt = {
+        'model': model.state_dict()
+    }
+    if optimizer is not None:
+        ckpt['optimizer'] = optimizer.state_dict()
+    if epoch is not None:
+        ckpt['epoch'] = epoch
+    if extra is not None:
+        ckpt['extra'] = extra
+    torch.save(ckpt, path)
+
+
+def load_model(path, model, optimizer=None, device=None):
+    """Load checkpoint into model and optimizer (optional)."""
+    ckpt = torch.load(path, map_location=device)
+    model.load_state_dict(ckpt['model_state_dict'])
+    if optimizer is not None and 'optimizer_state_dict' in ckpt:
+        optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+    epoch = ckpt.get('epoch', None)
+    return epoch
 
 
 
