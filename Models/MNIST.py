@@ -66,8 +66,8 @@ class MNIST_paper(nn.Module):
         Z_emb = self.find_nearest(Z_enc, self.embeding.weight)
         self.hook(Z_emb) # For gradient handling trick
 
-        Z_dec = self.decode(Z_emb).view(-1, 1, 28, 28)
+        X_recons = self.decode(Z_emb).view(-1, 1, 28, 28)
         Z_enc_for_emb = self.find_nearest(self.embeding.weight, Z_enc) # update embedding vectors
 
-        return Z_dec, Z_enc, Z_dec, Z_enc_for_emb
+        return X_recons, Z_enc, Z_emb, Z_enc_for_emb
 

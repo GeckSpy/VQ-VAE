@@ -6,10 +6,9 @@ import torch.nn as nn
 from utils import Arguments, load_data
 from Models.MNIST import MNIST_paper
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+#________________ Solver Class ________________________________
 class Solver:
     def __init__(self, args:Arguments):
         self.args:Arguments = args.copy()
@@ -18,6 +17,7 @@ class Solver:
             self.model = MNIST_paper()
         else:
             assert ValueError("dataset " + self.args.dataset_name + " is not supported.")
+        self.model.to(device)
 
         self.loss = nn.MSELoss().to(device)
         self.data, self.data_loader = load_data(args)
@@ -34,7 +34,7 @@ class Solver:
             sgz_e_losses = []
             z_sge_losses = []
 
-            for _, (images, _) in enumerate(self.data):
+            for _, (images, _) in enumerate(self.data_loader):
 
                 X = images.to(device)
                 X_recon, Z_enc, Z_dec, Z_enc_for_embd = self.model(X)
@@ -52,6 +52,7 @@ class Solver:
                 reconstruction_losses.append(reconstruction_loss)
                 sgz_e_losses.append(sgz_e_loss)
                 z_sge_losses.append(z_sge_loss)
+        print(epoch, ": reconstruction losses average:", torch.cat(reconstruction_losses,0).mean())
 
 
 
