@@ -16,7 +16,7 @@ class Solver:
 
         self.model = MNIST_paper()
 
-        self.loss = nn.MSELoss()#.cuda()
+        self.loss = nn.MSELoss().cuda()
         self.data, self.data_loader = load_data(args)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),

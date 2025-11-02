@@ -24,7 +24,7 @@ class MNIST_paper(nn.Module):
         )
 
         # Embedding book
-        self.embeding = nn.Embedding(self.k_dim,self.z_dim).to(device)#.cuda()
+        self.embeding = nn.Embedding(self.k_dim,self.z_dim).to(device).cuda()
 
         # Decoder
         self.decode = nn.Sequential(
