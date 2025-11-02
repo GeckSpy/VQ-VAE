@@ -11,6 +11,12 @@ class Arguments:
         self.dataset_name = dataset_name
         self.batch_size = batch_size
 
+    def copy(self):
+        return Arguments(epoches=self.epoches,
+                         learning_rate=self.learning_rate,
+                         dataset_name=self.dataset_name,
+                         batch_size=self.batch_size)
+
 
 
 
