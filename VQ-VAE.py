@@ -33,16 +33,24 @@ class Solver:
             sgz_e_losses = []
             z_sge_losses = []
 
-            for id, (image, label) in enumerate(self.data):
+            for _, (images, _) in enumerate(self.data):
 
-                X = ???
-
+                X = images.to(device)
                 X_recon, Z_enc, Z_dec, Z_enc_for_embd = self.model(X)
 
                 reconstruction_loss = self.loss(X_recon, X)
                 sgz_e_loss = self.loss(self.model.embeding.weight, Z_enc_for_embd.detach())
                 z_sge_loss = self.loss(Z_enc, Z_dec.detach())
-                total_loss = reconstruction_loss + sgz_e_loss + z_sge_loss
+                total_loss = reconstruction_loss + sgz_e_loss + self.args.beta*z_sge_loss
+
+                self.optimizer.zero_grad()
+                total_loss.backward(retain_graph=True)
+                Z_enc.backward(self.model.grad_for_encoder)
+                self.optimizer.step()
+
+                reconstruction_losses.append(reconstruction_loss)
+                sgz_e_losses.append(sgz_e_loss)
+                z_sge_losses.append(z_sge_loss)
 
 
 

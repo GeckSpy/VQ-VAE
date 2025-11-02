@@ -5,11 +5,12 @@ from torch.utils.data import DataLoader
 
 
 class Arguments:
-    def __init__(self, epoches, learning_rate, dataset_name, batch_size):
+    def __init__(self, epoches, learning_rate, dataset_name, batch_size, beta):
         self.learning_rate = learning_rate
         self.epoches = epoches
         self.dataset_name = dataset_name
         self.batch_size = batch_size
+        self.beta = beta
 
     def copy(self):
         return Arguments(epoches=self.epoches,
@@ -52,7 +53,7 @@ def load_data(args:Arguments, force_dowload=False):
         
 
 def test():
-    arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100)
+    arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100, beta=1)
     data, loader = load_data(arg)
 
     print(type(loader))
