@@ -29,12 +29,16 @@ class Solver:
 
 
     def train(self):
+        """
+        Training the model.
+        """
         for epoch in range(self.args.epoches):
             reconstruction_losses = []
             sgz_e_losses = []
             z_sge_losses = []
 
-            for _, (images, _) in enumerate(self.data_loader):
+            for id, (images, _) in enumerate(self.data_loader):
+                #print(id, end=" ")
 
                 X = images.to(device)
                 X_recon, Z_enc, Z_dec, Z_enc_for_embd = self.model(X)
@@ -49,10 +53,13 @@ class Solver:
                 Z_enc.backward(self.model.grad_for_encoder)
                 self.optimizer.step()
 
-                reconstruction_losses.append(reconstruction_loss)
-                sgz_e_losses.append(sgz_e_loss)
-                z_sge_losses.append(z_sge_loss)
-        print(epoch, ": reconstruction losses average:", torch.cat(reconstruction_losses,0).mean())
+                reconstruction_losses.append(reconstruction_loss.item())
+                sgz_e_losses.append(sgz_e_loss.item())
+                z_sge_losses.append(z_sge_loss.item())
+            print(epoch, ":")
+            print("   reconstruction losses average:", np.average(reconstruction_losses))
+            print("   sgz_e losses average:", np.average(sgz_e_losses))
+            print("   z_sge losses average:", np.average(z_sge_losses))
 
 
 
@@ -63,9 +70,10 @@ def save_model(path, model, optimizer=None, epoch=None, extra=None):
     """Save state dict and optimizer (optional)."""
     root = "./saves"
     if not os.path.exists(root):
-        raise ValueError("Wrong root.")
+        raise ValueError("Wrong root. Please place yourself on correct root directory.")
+    root += "/" + path + ".pth"
 
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    os.makedirs(os.path.dirname(root), exist_ok=True)
     ckpt = {
         'model': model.state_dict()
     }
@@ -75,22 +83,34 @@ def save_model(path, model, optimizer=None, epoch=None, extra=None):
         ckpt['epoch'] = epoch
     if extra is not None:
         ckpt['extra'] = extra
-    torch.save(ckpt, path)
+    torch.save(ckpt, root)
 
 
-def load_model(path, model, optimizer=None, device=None):
+def load_model(path_init, model, optimizer=None, device=None):
     """Load checkpoint into model and optimizer (optional)."""
-    ckpt = torch.load(path, map_location=device)
-    model.load_state_dict(ckpt['model_state_dict'])
-    if optimizer is not None and 'optimizer_state_dict' in ckpt:
-        optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+    path = "./saves/" + path_init + ".pth"
+    ckpt = torch.load(path, map_location=device, weights_only=True)
+    model.load_state_dict(ckpt['model'])
+    if optimizer is not None and 'optimizer' in ckpt:
+        optimizer.load_state_dict(ckpt['optimizer'])
     epoch = ckpt.get('epoch', None)
     return epoch
 
 
+# _____________
+
+def train_model(args:Arguments, model_name):
+    solver = Solver(args)
+    solver.train()
+    save_model(model_name, solver.model)
+    
+
+def test_model(model, model_name):
+    model.to(device)
+    load_model(model_name, model)
+    #model.eval()
 
 
-
-
-
-
+args = Arguments(epoches=30, learning_rate=2e-4, dataset_name="MNIST", batch_size=128, beta=0.25)
+train_model(args, "MNIST_paper1")
+#test_model(MNIST_paper(), "MNIST_paper1")
