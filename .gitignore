@@ -1,3 +1,4 @@
 Datasets/*
 saves/*
 __pycache__/*
+Models/__pycache__/*
