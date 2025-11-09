@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
 from utils import Arguments, load_data
 from Models.MNIST import MNIST_paper
@@ -72,17 +73,12 @@ def save_model(path, model, optimizer=None, epoch=None, extra=None):
     if not os.path.exists(root):
         raise ValueError("Wrong root. Please place yourself on correct root directory.")
     root += "/" + path + ".pth"
+    #os.makedirs(os.path.dirname(root), exist_ok=True)
 
-    os.makedirs(os.path.dirname(root), exist_ok=True)
-    ckpt = {
-        'model': model.state_dict()
-    }
-    if optimizer is not None:
-        ckpt['optimizer'] = optimizer.state_dict()
-    if epoch is not None:
-        ckpt['epoch'] = epoch
-    if extra is not None:
-        ckpt['extra'] = extra
+    ckpt = {'model': model.state_dict()}
+    if optimizer is not None: ckpt['optimizer'] = optimizer.state_dict()
+    if epoch is not None: ckpt['epoch'] = epoch
+    if extra is not None: ckpt['extra'] = extra
     torch.save(ckpt, root)
 
 
@@ -97,7 +93,7 @@ def load_model(path_init, model, optimizer=None, device=None):
     return epoch
 
 
-# _____________
+# ______________________________
 
 def train_model(args:Arguments, model_name):
     solver = Solver(args)
@@ -105,12 +101,32 @@ def train_model(args:Arguments, model_name):
     save_model(model_name, solver.model)
     
 
-def test_model(model, model_name):
-    model.to(device)
-    load_model(model_name, model)
-    #model.eval()
+def test_model(args:Arguments, model_name):
+    solver = Solver(args)
+    load_model(model_name, solver.model)
+    solver.model.eval()
+
+    datas, _ = next(iter(solver.data_loader))
+    #datas = datas.to(device)
+    data = datas[np.random.randint(0, datas.shape[0]-1)].to(device)
+
+
+    def show_sample(sample, reconstruction):
+        if args.dataset_name=="MNIST":
+            fig, axs = plt.subplots(1,2)
+            axs[0].imshow(sample[0], cmap="gray")
+            axs[1].imshow(reconstruction[0], cmap="gray")
+            plt.show()
+    
+    print(data.shape)
+    with torch.no_grad():
+        datas_reconstructed, _, _, _ = solver.model(data)
+    data_reconstructed = datas_reconstructed[0]
+    print(data_reconstructed.shape)
+    show_sample(data, data_reconstructed)
+
 
 
 args = Arguments(epoches=30, learning_rate=2e-4, dataset_name="MNIST", batch_size=128, beta=0.25)
-train_model(args, "MNIST_paper1")
-#test_model(MNIST_paper(), "MNIST_paper1")
+#train_model(args, "MNIST_paper1")
+test_model(args, "MNIST_paper1")
