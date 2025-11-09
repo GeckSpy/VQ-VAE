@@ -7,7 +7,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MNIST_paper(nn.Module):
     # same architecture than paper
-    def __init__(self, k_dim:int=10, z_dim:int=10):
+    def __init__(self, k_dim:int=10, z_dim:int=64):
         super(MNIST_paper, self).__init__()
         self.k_dim = k_dim
         self.z_dim = z_dim
@@ -64,7 +64,7 @@ class MNIST_paper(nn.Module):
         """
         Z_enc = self.encode(X.view(-1, 784)) # Flatten X and encode it
         Z_emb = self.find_nearest(Z_enc, self.embeding.weight)
-        self.hook(Z_emb) # For gradient handling trick
+        Z_emb.register_hook(self.hook)# For gradient handling trick
 
         X_recons = self.decode(Z_emb).view(-1, 1, 28, 28)
         Z_enc_for_emb = self.find_nearest(self.embeding.weight, Z_enc) # update embedding vectors

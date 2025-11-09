@@ -95,38 +95,44 @@ def load_model(path_init, model, optimizer=None, device=None):
 
 # ______________________________
 
-def train_model(args:Arguments, model_name):
+def train_model(args:Arguments, model_name, save=True):
     solver = Solver(args)
     solver.train()
-    save_model(model_name, solver.model)
+    if save:
+        save_model(model_name, solver.model)
     
 
-def test_model(args:Arguments, model_name):
+
+def test_model(args:Arguments, model_name, K=1):
     solver = Solver(args)
     load_model(model_name, solver.model)
     solver.model.eval()
 
     datas, _ = next(iter(solver.data_loader))
-    #datas = datas.to(device)
-    data = datas[np.random.randint(0, datas.shape[0]-1)].to(device)
+    data = datas[np.random.randint(0, datas.shape[0]-1, K)].to(device)
 
 
     def show_sample(sample, reconstruction):
         if args.dataset_name=="MNIST":
-            fig, axs = plt.subplots(1,2)
-            axs[0].imshow(sample[0], cmap="gray")
-            axs[1].imshow(reconstruction[0], cmap="gray")
+            fig, axs = plt.subplots(2,K)
+            fig.subplots_adjust(hspace=-0.8, wspace=0.1)
+            
+            for k in range(K):
+                axs[0,k].imshow(sample[k,0], cmap="gray")
+                axs[1,k].imshow(reconstruction[k,0], cmap="gray")
+                axs[0,k].axis("off")
+                axs[1,k].axis("off")
+                
             plt.show()
     
     print(data.shape)
-    with torch.no_grad():
-        datas_reconstructed, _, _, _ = solver.model(data)
-    data_reconstructed = datas_reconstructed[0]
-    print(data_reconstructed.shape)
-    show_sample(data, data_reconstructed)
+    #with torch.no_grad():
+    datas_reconstructed, _, _, _ = solver.model(data)
+    print(datas_reconstructed.shape)
+    show_sample(data, datas_reconstructed.detach())
 
 
 
-args = Arguments(epoches=30, learning_rate=2e-4, dataset_name="MNIST", batch_size=128, beta=0.25)
+args = Arguments(epoches=30, learning_rate=1e-4, dataset_name="MNIST", batch_size=128, beta=0.25)
 #train_model(args, "MNIST_paper1")
-test_model(args, "MNIST_paper1")
+test_model(args, "MNIST_paper1", K=12)
