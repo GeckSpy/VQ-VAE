@@ -1,6 +1,6 @@
 import os
 from torchvision import transforms
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, CIFAR10
 from torch.utils.data import DataLoader
 
 
@@ -77,6 +77,18 @@ def load_data(args:Arguments, force_dowload=False):
                      transform=transform,
                      download=True)
         
+    elif args.dataset_name == "CIFAR10":
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5)),
+        ])
+        num_workers = 16
+        data = CIFAR10(root=root,
+                       train=True,
+                       transform=transform,
+                       download=True)
+
+        
 
     loader = DataLoader(data,
                         batch_size=args.batch_size,
@@ -91,6 +103,7 @@ def load_data(args:Arguments, force_dowload=False):
 
 def test():
     arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100, beta=1)
+    #arg.modify(dataset_name="CIFAR10")
     data, loader = load_data(arg)
 
     print(type(loader))

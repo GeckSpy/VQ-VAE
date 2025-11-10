@@ -135,3 +135,7 @@ args = Arguments(dataset_name="MNIST",
                  k_dim=128, z_dim=64)
 #train_model(args, "MNIST_paper1")
 #test_model(args, "MNIST_paper1", K=12)
+
+model_name = "CIFAR10_paper1"
+train_model(args, model_name)
+test_model(args, model_name, K=12)
