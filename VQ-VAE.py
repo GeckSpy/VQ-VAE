@@ -116,7 +116,7 @@ def test_model(args:Arguments, model_name, K=1):
     def show_sample(sample, reconstruction):
         if args.dataset_name=="MNIST":
             fig, axs = plt.subplots(2,K)
-            fig.subplots_adjust(hspace=-0.8, wspace=0.1)
+            fig.subplots_adjust(hspace=-0.85, wspace=0.1)
             
             for k in range(K):
                 axs[0,k].imshow(sample[k,0], cmap="gray")
