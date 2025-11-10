@@ -59,9 +59,6 @@ class PixelCNN1D(nn.Module):
 
     def forward(self, X):
         # X of shape [B, z_dim]
-        print("FORWARD")
-        print(X.shape)
-        X = X.unsqueezed(2)
         logits = self.encode(X)  # -> [B, k_dim, L]
         return logits
 

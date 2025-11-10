@@ -29,24 +29,21 @@ def generate_randomly(args:Arguments, model_name, K=2):
     show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
 
 
-def train_CNN(args_model:Arguments, model_name:str,
-              args_CNN:Arguments, cnn_model_name:str):
-    """
-    Train the pixel-CNN model for futur sampling.
-    """
-    solver = Solver(args_model)
-    load_model(model_name, solver.model)
-    solver.model.eval()
-
-    criterion = F.cross_entropy
-
+def create_data_for_training(solver:Solver):
     datas = {"Z":[], "id":[]}
     for id, (images,_) in enumerate(solver.data_loader):
         X = images.to(device)
         Z_enc, embedded_index = solver.model.forward_pixelCNN(X)
+        if solver.args.dataset_name=="MNIST":
+            Z_enc = Z_enc.unsqueeze(2)
+            embedded_index = embedded_index.unsqueeze(1)
+
         datas["Z"].append(Z_enc.detach().to(device))
         datas["id"].append(embedded_index.detach().to(device).long())
+    return datas
 
+
+def create_pixel_cnn(args_model:Arguments):
     if args_model.dataset_name=="MNIST":
         pixelcnn = PixelCNN1D(k_dim=args_model.k_dim,
                             z_dim=args_model.z_dim,
@@ -58,8 +55,21 @@ def train_CNN(args_model:Arguments, model_name:str,
                             z_dim=args_model.z_dim,
                             kernel_size=args_CNN.kernel_size,
                             fm=args_CNN.fm)
-    pixelcnn = pixelcnn.to(device)
-        
+    return pixelcnn
+
+
+def train_CNN(args_model:Arguments, model_name:str,
+              args_CNN:Arguments, cnn_model_name:str):
+    """
+    Train the pixel-CNN model for futur sampling.
+    """
+    solver = Solver(args_model)
+    load_model(model_name, solver.model)
+    solver.model.eval()
+    criterion = F.cross_entropy
+    datas= create_data_for_training(solver)
+
+    pixelcnn = create_pixel_cnn(args_model).to(device)
     optimizer = torch.optim.Adam(pixelcnn.parameters(),
                                  lr=args_CNN.learning_rate,
                                  betas=(0.5, 0.999))
@@ -70,7 +80,6 @@ def train_CNN(args_model:Arguments, model_name:str,
             Z_enc = datas["Z"][i].to(device)
             index = datas["id"][i].to(device)
 
-            print("Z_enc shape:", Z_enc.shape, "index shape:", index.shape)
             logits = pixelcnn(Z_enc)
             loss = criterion(logits, index)
             optimizer.zero_grad()
