@@ -34,6 +34,22 @@ class Arguments:
                          kernel_size=self.kernel_size,
                          fm=self.fm)
 
+    def modify(self,
+                 epoches=None, learning_rate=None,
+                 dataset_name=None,
+                 batch_size=None, beta=None,
+                 k_dim=None, z_dim=None,
+                 kernel_size=None, fm=None):
+        if epoches!=None: self.epoches=epoches
+        if learning_rate!=None: self.learning_rate=learning_rate
+        if dataset_name!=None: self.dataset_name=dataset_name
+        if batch_size!=None: self.batch_size=batch_size
+        if beta!=None: self.beta=beta
+        if k_dim!=None: self.k_dim=k_dim
+        if z_dim!=None: self.z_dim=z_dim
+        if kernel_size!=None: self.kernel_size=kernel_size
+        if fm!=None: self.fm=fm
+
 
 
 

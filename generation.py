@@ -29,21 +29,29 @@ def generate_randomly(args:Arguments, model_name, K=2):
     show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
 
 
-def train_CNN(args_model:Arguments, model_name:str):
+def train_CNN(args_model:Arguments, model_name:str, args_CNN:Arguments):
     solver = Solver(args_model)
     load_model(model_name, solver.model)
     solver.model.eval()
 
     criterion = F.cross_entropy
+
     datas = {"Z":[], "id":[]}
     for id, (images,_) in enumerate(solver.data_loader):
-        x = images.to(device)
-        
+        X = images.to(device)
+        Z_enc, embedded_index = solver.model.forward_pixelCNN(X)
+        datas["Z"].append(Z_enc.data)
+        datas["id"].append(embedded_index)
 
 
 
-args = Arguments(dataset_name="MNIST",
+args_model = Arguments(dataset_name="MNIST",
                  epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
-#test_model(args, "MNIST_paper1", K=12)
-generate_randomly(args, "MNIST_paper1", K=12)
+args_CNN = args_model.copy()
+args_CNN = Arguments(dataset_name="MNIST",
+                 epoches=30, learning_rate=1e-3, batch_size=100, beta=0.1,
+                 k_dim=128, z_dim=64,
+                 kernel_size=3, fm=64)
+#generate_randomly(args_model, "MNIST_paper1", K=12)
+train_CNN(args_model, "MNIST_paper1", args_CNN)
