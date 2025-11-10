@@ -130,26 +130,8 @@ def test_model(args:Arguments, model_name, K=1):
 
 
 
-def generate_randomly(args:Arguments, model_name, K=2):
-    """Generate new samples according to random uniform initial samples.
-    
-    Note that this is not the correct way to do it."""
-    solver = Solver(args)
-    load_model(model_name, solver.model)
-    solver.model.eval()
-
-    datas, _ = next(iter(solver.data_loader))
-    data = datas[np.random.randint(0, datas.shape[0]-1, K)]
-    data = torch.rand(data.shape).to(device)
-    
-    datas_reconstructed, _, _, _ = solver.model(data)
-    show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
-
-
-
 args = Arguments(dataset_name="MNIST",
                  epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
 #train_model(args, "MNIST_paper1")
 #test_model(args, "MNIST_paper1", K=12)
-test(args, "MNIST_paper1", K=12)
