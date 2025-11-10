@@ -9,6 +9,9 @@ from Models.MNIST import MNIST_paper
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+
+
 #________________ Solver Class ________________________________
 class Solver:
     def __init__(self, args:Arguments):
@@ -31,16 +34,14 @@ class Solver:
 
     def train(self):
         """
-        Training the model.
+        Train the model
         """
         for epoch in range(self.args.epoches):
             reconstruction_losses = []
             sgz_e_losses = []
             z_sge_losses = []
 
-            for id, (images, _) in enumerate(self.data_loader):
-                #print(id, end=" ")
-
+            for _, (images, _) in enumerate(self.data_loader):
                 X = images.to(device)
                 X_recon, Z_enc, Z_dec, Z_enc_for_embd = self.model(X)
 
@@ -73,7 +74,6 @@ def save_model(path, model, optimizer=None, epoch=None, extra=None):
     if not os.path.exists(root):
         raise ValueError("Wrong root. Please place yourself on correct root directory.")
     root += "/" + path + ".pth"
-    #os.makedirs(os.path.dirname(root), exist_ok=True)
 
     ckpt = {'model': model.state_dict()}
     if optimizer is not None: ckpt['optimizer'] = optimizer.state_dict()
@@ -96,6 +96,7 @@ def load_model(path_init, model, optimizer=None, device=None):
 # ______________________________
 
 def train_model(args:Arguments, model_name, save=True):
+    """Train a model"""
     solver = Solver(args)
     solver.train()
     if save:
@@ -104,13 +105,13 @@ def train_model(args:Arguments, model_name, save=True):
 
 
 def test_model(args:Arguments, model_name, K=1):
+    """Show results of trained model"""
     solver = Solver(args)
     load_model(model_name, solver.model)
     solver.model.eval()
 
     datas, _ = next(iter(solver.data_loader))
     data = datas[np.random.randint(0, datas.shape[0]-1, K)].to(device)
-
 
     def show_sample(sample, reconstruction):
         if args.dataset_name=="MNIST":
@@ -125,10 +126,7 @@ def test_model(args:Arguments, model_name, K=1):
                 
             plt.show()
     
-    
-    #with torch.no_grad():
     datas_reconstructed, _, _, _ = solver.model(data)
-    #print(data.shape, datas_reconstructed.shape)
     show_sample(data, datas_reconstructed.detach())
 
 
