@@ -157,5 +157,5 @@ args = Arguments(dataset_name="CIFAR10",
                  epoches=3, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
 model_name = "CIFAR10_paper1"
-#train_model(args, model_name)
-#test_model(args, model_name, K=6)
+train_model(args, model_name)
+test_model(args, model_name, K=6)

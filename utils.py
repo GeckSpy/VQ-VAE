@@ -2,53 +2,26 @@ import os
 from torchvision import transforms
 from torchvision.datasets import MNIST, CIFAR10
 from torch.utils.data import DataLoader
+from dataclasses import dataclass, replace
 
-
+@dataclass
 class Arguments:
-    """Class to deal all training arguments"""
-    def __init__(self,
-                 epoches=100, learning_rate=2e-4,
-                 dataset_name="MNIST",
-                 batch_size=100, beta=0.25,
-                 k_dim=10, z_dim=64,
-                 kernel_size=3, fm=64):
-        self.learning_rate = learning_rate
-        self.epoches = epoches
-        self.dataset_name = dataset_name
-        self.batch_size = batch_size
-        self.beta = beta
-        self.k_dim = k_dim
-        self.z_dim = z_dim
-        self.kernel_size = kernel_size
-        self.fm = fm
+    epoches: int = 100
+    learning_rate: float = 2e-4
+    dataset_name: str = "MNIST"
+    batch_size: int = 100
+    beta: float = 0.25
+    k_dim: int = 10
+    z_dim: int = 64
+    kernel_size: int = 3
+    fm: int = 64
 
     def copy(self):
-        """Copy the arguments"""
-        return Arguments(epoches=self.epoches,
-                         learning_rate=self.learning_rate,
-                         dataset_name=self.dataset_name,
-                         batch_size=self.batch_size,
-                         beta=self.beta,
-                         k_dim=self.k_dim,
-                         z_dim=self.z_dim,
-                         kernel_size=self.kernel_size,
-                         fm=self.fm)
+        return replace(self)
 
-    def modify(self,
-                 epoches=None, learning_rate=None,
-                 dataset_name=None,
-                 batch_size=None, beta=None,
-                 k_dim=None, z_dim=None,
-                 kernel_size=None, fm=None):
-        if epoches!=None: self.epoches=epoches
-        if learning_rate!=None: self.learning_rate=learning_rate
-        if dataset_name!=None: self.dataset_name=dataset_name
-        if batch_size!=None: self.batch_size=batch_size
-        if beta!=None: self.beta=beta
-        if k_dim!=None: self.k_dim=k_dim
-        if z_dim!=None: self.z_dim=z_dim
-        if kernel_size!=None: self.kernel_size=kernel_size
-        if fm!=None: self.fm=fm
+    def modify(self, **kwargs):
+        return replace(self, **kwargs)
+
 
 
 
@@ -103,7 +76,7 @@ def load_data(args:Arguments, force_dowload=False):
 
 def test():
     arg = Arguments(epoches=100, learning_rate=1e-3, dataset_name="MNIST", batch_size=100, beta=1)
-    #arg.modify(dataset_name="CIFAR10")
+    arg.modify(dataset_name="CIFAR10")
     data, loader = load_data(arg)
 
     print(type(loader))
