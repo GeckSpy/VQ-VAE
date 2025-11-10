@@ -6,12 +6,14 @@ from torch.utils.data import DataLoader
 
 class Arguments:
     """Class to deal all training arguments"""
-    def __init__(self, epoches, learning_rate, dataset_name, batch_size, beta):
+    def __init__(self, epoches, learning_rate, dataset_name, batch_size, beta, k_dim=10, z_dim=64):
         self.learning_rate = learning_rate
         self.epoches = epoches
         self.dataset_name = dataset_name
         self.batch_size = batch_size
         self.beta = beta
+        self.k_dim = k_dim
+        self.z_dim = z_dim
 
     def copy(self):
         """Copy the arguments"""
@@ -19,7 +21,9 @@ class Arguments:
                          learning_rate=self.learning_rate,
                          dataset_name=self.dataset_name,
                          batch_size=self.batch_size,
-                         beta=self.beta)
+                         beta=self.beta,
+                         k_dim=self.k_dim,
+                         z_dim=self.z_dim)
 
 
 

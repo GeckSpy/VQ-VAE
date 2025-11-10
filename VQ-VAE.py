@@ -15,7 +15,7 @@ class Solver:
         self.args:Arguments = args.copy()
 
         if self.args.dataset_name == "MNIST":
-            self.model = MNIST_paper()
+            self.model = MNIST_paper(k_dim=args.k_dim, z_dim=args.z_dim)
         else:
             assert ValueError("dataset " + self.args.dataset_name + " is not supported.")
         self.model.to(device)
@@ -125,14 +125,15 @@ def test_model(args:Arguments, model_name, K=1):
                 
             plt.show()
     
-    print(data.shape)
+    
     #with torch.no_grad():
     datas_reconstructed, _, _, _ = solver.model(data)
-    print(datas_reconstructed.shape)
+    #print(data.shape, datas_reconstructed.shape)
     show_sample(data, datas_reconstructed.detach())
 
 
 
-args = Arguments(epoches=30, learning_rate=1e-4, dataset_name="MNIST", batch_size=128, beta=0.25)
-#train_model(args, "MNIST_paper1")
+args = Arguments(epoches=30, learning_rate=1e-4, dataset_name="MNIST", batch_size=100, beta=0.1,
+                 k_dim=64, z_dim=64)
+train_model(args, "MNIST_paper1")
 test_model(args, "MNIST_paper1", K=12)
