@@ -6,11 +6,10 @@ import matplotlib.pyplot as plt
 
 from utils import Arguments, load_data
 from Models.MNIST import MNIST_paper
-
-from 
+from Models.PixelCNN import PIXELCNN
+from VQ_VAE import Solver, load_model, show_sample
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 
 def generate_randomly(args:Arguments, model_name, K=2):
@@ -27,6 +26,12 @@ def generate_randomly(args:Arguments, model_name, K=2):
     
     datas_reconstructed, _, _, _ = solver.model(data)
     show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
+
+
+def train_CNN(args_model:Arguments, model_name:str):
+    solver = Solver(args_model)
+    load_model(model_name, solver.model)
+    solver.model.eval()
 
 
 
