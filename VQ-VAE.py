@@ -103,18 +103,8 @@ def train_model(args:Arguments, model_name, save=True):
         save_model(model_name, solver.model)
     
 
-
-def test_model(args:Arguments, model_name, K=1):
-    """Show results of trained model"""
-    solver = Solver(args)
-    load_model(model_name, solver.model)
-    solver.model.eval()
-
-    datas, _ = next(iter(solver.data_loader))
-    data = datas[np.random.randint(0, datas.shape[0]-1, K)].to(device)
-
-    def show_sample(sample, reconstruction):
-        if args.dataset_name=="MNIST":
+def show_sample(sample, reconstruction, dataset_name, K=2):
+        if dataset_name=="MNIST":
             fig, axs = plt.subplots(2,K)
             fig.subplots_adjust(hspace=-0.85, wspace=0.1)
             
@@ -125,9 +115,35 @@ def test_model(args:Arguments, model_name, K=1):
                 axs[1,k].axis("off")
                 
             plt.show()
+
+
+def test_model(args:Arguments, model_name, K=1):
+    """Show results of trained model"""
+    solver = Solver(args)
+    load_model(model_name, solver.model)
+    solver.model.eval()
+    datas, _ = next(iter(solver.data_loader))
+    data = datas[np.random.randint(0, datas.shape[0]-1, K)].to(device)
     
     datas_reconstructed, _, _, _ = solver.model(data)
-    show_sample(data, datas_reconstructed.detach())
+    show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
+
+
+
+def generate_randomly(args:Arguments, model_name, K=2):
+    """Generate new samples according to random uniform initial samples.
+    
+    Note that this is not the correct way to do it."""
+    solver = Solver(args)
+    load_model(model_name, solver.model)
+    solver.model.eval()
+
+    datas, _ = next(iter(solver.data_loader))
+    data = datas[np.random.randint(0, datas.shape[0]-1, K)]
+    data = torch.rand(data.shape).to(device)
+    
+    datas_reconstructed, _, _, _ = solver.model(data)
+    show_sample(data, datas_reconstructed.detach(), args.dataset_name, K)
 
 
 
@@ -135,4 +151,5 @@ args = Arguments(dataset_name="MNIST",
                  epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
 #train_model(args, "MNIST_paper1")
-test_model(args, "MNIST_paper1", K=12)
+#test_model(args, "MNIST_paper1", K=12)
+test(args, "MNIST_paper1", K=12)
