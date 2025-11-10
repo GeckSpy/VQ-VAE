@@ -133,7 +133,8 @@ def test_model(args:Arguments, model_name, K=1):
 
 
 
-args = Arguments(epoches=30, learning_rate=1e-4, dataset_name="MNIST", batch_size=100, beta=0.1,
-                 k_dim=64, z_dim=64)
-train_model(args, "MNIST_paper1")
+args = Arguments(dataset_name="MNIST",
+                 epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
+                 k_dim=128, z_dim=64)
+#train_model(args, "MNIST_paper1")
 test_model(args, "MNIST_paper1", K=12)
