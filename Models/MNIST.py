@@ -39,7 +39,7 @@ class MNIST_paper(nn.Module):
         )
 
 
-    def find_nearest(self, query, target):
+    def find_nearest(self, query, target, return_index=False):
         """
         Maps query (encoder output) to closest embedding vector
         """
@@ -47,7 +47,10 @@ class MNIST_paper(nn.Module):
         T = target.unsqueeze(0).repeat(query.size(0),1,1) # Copy
         distances = (Q-T).pow(2).sum(2) # computes all pairwise distances
         index = distances.min(1)[1] # .min() resturn (min, indices)
-        return target[index]
+        if return_index:
+            return index
+        else:
+            return target[index]
 
 
     def hook(self, grad):
@@ -70,4 +73,13 @@ class MNIST_paper(nn.Module):
         Z_enc_for_emb = self.find_nearest(self.embeding.weight, Z_enc) # update embedding vectors
 
         return X_recons, Z_enc, Z_emb, Z_enc_for_emb
+    
+
+    def forward_pixelCNN(self, X):
+        """
+        Return wanted information for training pixelCNN
+        """
+        Z_enc = self.encode(X.view(-1, 784)) # Flatten X and encode it
+        index = self.find_nearest(Z_enc, self.embeding.weight, return_index=True)
+        return Z_enc, index
 

@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 from utils import Arguments, load_data
@@ -32,6 +33,12 @@ def train_CNN(args_model:Arguments, model_name:str):
     solver = Solver(args_model)
     load_model(model_name, solver.model)
     solver.model.eval()
+
+    criterion = F.cross_entropy
+    datas = {"Z":[], "id":[]}
+    for id, (images,_) in enumerate(solver.data_loader):
+        x = images.to(device)
+        
 
 
 
