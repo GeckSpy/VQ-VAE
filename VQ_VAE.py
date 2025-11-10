@@ -109,6 +109,17 @@ def train_model(args:Arguments, model_name, save=True):
     
 
 def show_sample(sample, reconstruction, dataset_name, K=2):
+    def correct_sample(sample):
+        if dataset_name=="MNIST":
+            return sample[0]
+        elif dataset_name=="CIFAR10":
+            c,n,m = sample.shape
+            result = np.zeros((n,m,c))
+            for k in range(c):
+                result[:,:,k] = sample[k,:,:]
+            return result
+
+
     if dataset_name=="MNIST" or dataset_name=="CIFAR10":
         cmap="gray" if dataset_name=="MNIST" else "viridis"
 
@@ -116,8 +127,8 @@ def show_sample(sample, reconstruction, dataset_name, K=2):
         fig.subplots_adjust(hspace=-0.5, wspace=0.1)
         
         for k in range(K):
-            axs[0,k].imshow(sample[k,0], cmap=cmap)
-            axs[1,k].imshow(reconstruction[k,0], cmap=cmap)
+            axs[0,k].imshow(correct_sample(sample[k]), cmap=cmap)
+            axs[1,k].imshow(correct_sample(reconstruction[k]), cmap=cmap)
             axs[0,k].axis("off")
             axs[1,k].axis("off")    
         plt.show()
@@ -146,5 +157,5 @@ args = Arguments(dataset_name="CIFAR10",
                  epoches=3, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
 model_name = "CIFAR10_paper1"
-train_model(args, model_name)
-test_model(args, model_name, K=6)
+#train_model(args, model_name)
+#test_model(args, model_name, K=6)
