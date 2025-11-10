@@ -62,7 +62,7 @@ def load_data(args:Arguments, force_dowload=False):
         transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5)),
     ])
     root = "./Datasets/"
-    if (not os.path.exists(root + args.dataset_name)) and (not force_dowload):
+    if (not os.path.exists(root)):
         error_str = "path to directory dataset: '" + root+args.dataset_name + "' does not exist\nPlease download dataset first"
         raise ValueError(error_str)
 

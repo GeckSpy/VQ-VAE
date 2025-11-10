@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from utils import Arguments, load_data
 from Models.MNIST import MNIST_paper
+from Models.CIFAR10 import MODEL_CIFAR10
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -19,6 +20,8 @@ class Solver:
 
         if self.args.dataset_name == "MNIST":
             self.model = MNIST_paper(k_dim=args.k_dim, z_dim=args.z_dim)
+        elif self.args.dataset_name == "CIFAR10":
+            self.model = MODEL_CIFAR10(k_dim=args.k_dim, z_dim=args.z_dim)
         else:
             assert ValueError("dataset " + self.args.dataset_name + " is not supported.")
         self.model.to(device)
@@ -36,6 +39,7 @@ class Solver:
         """
         Train the model
         """
+        print("Starting of training")
         for epoch in range(self.args.epoches):
             reconstruction_losses = []
             sgz_e_losses = []
@@ -46,7 +50,7 @@ class Solver:
                 X_recon, Z_enc, Z_dec, Z_enc_for_embd = self.model(X)
 
                 reconstruction_loss = self.loss(X_recon, X)
-                sgz_e_loss = self.loss(self.model.embeding.weight, Z_enc_for_embd.detach())
+                sgz_e_loss = self.loss(self.model.embd.weight, Z_enc_for_embd.detach())
                 z_sge_loss = self.loss(Z_enc, Z_dec.detach())
                 total_loss = reconstruction_loss + sgz_e_loss + self.args.beta*z_sge_loss
 
@@ -62,6 +66,7 @@ class Solver:
             print("   reconstruction losses average:", np.average(reconstruction_losses))
             print("   sgz_e losses average:", np.average(sgz_e_losses))
             print("   z_sge losses average:", np.average(z_sge_losses))
+        print("Training finished")
 
 
 
@@ -104,17 +109,18 @@ def train_model(args:Arguments, model_name, save=True):
     
 
 def show_sample(sample, reconstruction, dataset_name, K=2):
-        if dataset_name=="MNIST":
-            fig, axs = plt.subplots(2,K)
-            fig.subplots_adjust(hspace=-0.85, wspace=0.1)
-            
-            for k in range(K):
-                axs[0,k].imshow(sample[k,0], cmap="gray")
-                axs[1,k].imshow(reconstruction[k,0], cmap="gray")
-                axs[0,k].axis("off")
-                axs[1,k].axis("off")
-                
-            plt.show()
+    if dataset_name=="MNIST" or dataset_name=="CIFAR10":
+        cmap="gray" if dataset_name=="MNIST" else "viridis"
+
+        fig, axs = plt.subplots(2,K)
+        fig.subplots_adjust(hspace=-0.5, wspace=0.1)
+        
+        for k in range(K):
+            axs[0,k].imshow(sample[k,0], cmap=cmap)
+            axs[1,k].imshow(reconstruction[k,0], cmap=cmap)
+            axs[0,k].axis("off")
+            axs[1,k].axis("off")    
+        plt.show()
 
 
 def test_model(args:Arguments, model_name, K=1):
@@ -136,6 +142,9 @@ args = Arguments(dataset_name="MNIST",
 #train_model(args, "MNIST_paper1")
 #test_model(args, "MNIST_paper1", K=12)
 
-#model_name = "CIFAR10_paper1"
-#train_model(args, model_name)
-#test_model(args, model_name, K=12)
+args = Arguments(dataset_name="CIFAR10",
+                 epoches=3, learning_rate=1e-4, batch_size=100, beta=0.1,
+                 k_dim=128, z_dim=64)
+model_name = "CIFAR10_paper1"
+train_model(args, model_name)
+test_model(args, model_name, K=6)

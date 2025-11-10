@@ -24,7 +24,7 @@ class MNIST_paper(nn.Module):
         )
 
         # Embedding book
-        self.embeding = nn.Embedding(self.k_dim,self.z_dim).to(device)
+        self.embd = nn.Embedding(self.k_dim,self.z_dim).to(device)
 
         # Decoder
         self.decode = nn.Sequential(
@@ -66,11 +66,11 @@ class MNIST_paper(nn.Module):
         X: Pytorch tensor or batch_size x MNIST_size(28x28)
         """
         Z_enc = self.encode(X.view(-1, 784)) # Flatten X and encode it
-        Z_emb = self.find_nearest(Z_enc, self.embeding.weight)
+        Z_emb = self.find_nearest(Z_enc, self.embd.weight)
         Z_emb.register_hook(self.hook)# For gradient handling trick
 
         X_recons = self.decode(Z_emb).view(-1, 1, 28, 28)
-        Z_enc_for_emb = self.find_nearest(self.embeding.weight, Z_enc) # update embedding vectors
+        Z_enc_for_emb = self.find_nearest(self.embd.weight, Z_enc) # update embedding vectors
 
         return X_recons, Z_enc, Z_emb, Z_enc_for_emb
     
@@ -80,6 +80,6 @@ class MNIST_paper(nn.Module):
         Return wanted information for training pixelCNN
         """
         Z_enc = self.encode(X.view(-1, 784)) # Flatten X and encode it
-        index = self.find_nearest(Z_enc, self.embeding.weight, return_index=True)
+        index = self.find_nearest(Z_enc, self.embd.weight, return_index=True)
         return Z_enc, index
 

@@ -101,4 +101,4 @@ args_model = Arguments(dataset_name="MNIST",
 args_CNN = args_model.copy()
 args_CNN.modify(learning_rate=1e-3, kernel_size=3, fm=64, epoches=30)
 #generate_randomly(args_model, "MNIST_paper1", K=12)
-train_CNN(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1")
+#train_CNN(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1")
