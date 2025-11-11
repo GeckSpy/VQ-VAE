@@ -117,7 +117,7 @@ def show_sample(sample, reconstruction, dataset_name, K=2):
             result = np.zeros((n,m,c))
             for k in range(c):
                 result[:,:,k] = sample[k,:,:]
-            return result
+            return (result+1)/2
 
 
     if dataset_name=="MNIST" or dataset_name=="CIFAR10":
@@ -150,7 +150,8 @@ def test_model(args:Arguments, model_name, K=1):
 args = Arguments(dataset_name="MNIST",
                  epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
-#train_model(args, "MNIST_paper1")
+# k=10
+#train_model(args, "MNIST_paper0")
 #test_model(args, "MNIST_paper1", K=12)
 
 args = Arguments(dataset_name="CIFAR10",
