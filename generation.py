@@ -166,7 +166,7 @@ def generate_samples(args_model:Arguments, model_name,
                     if i < starting_point[0] or (i == starting_point[0] and j < starting_point[1]):
                             continue
                     logit = pixelcnn(rand_Z.detach())
-                    prob = F.softmax(logit).data
+                    prob = F.softmax(logit, dim=1).data
                     idx = torch.multinomial(prob[:,:,i,j],1).squeeze()
                     rand_Z[:,:,i,j] = emb[idx]
         generated = solver.model.decode(rand_Z).detach()
