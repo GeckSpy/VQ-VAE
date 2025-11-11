@@ -34,9 +34,13 @@ def create_data_for_training(solver:Solver):
     for id, (images,_) in enumerate(solver.data_loader):
         X = images.to(device)
         Z_enc, embedded_index = solver.model.forward_pixelCNN(X)
+
         if solver.args.dataset_name=="MNIST":
             Z_enc = Z_enc.unsqueeze(2)
             embedded_index = embedded_index.unsqueeze(1)
+        elif solver.args.dataset_name=="CIFAR10":
+            embedded_index = embedded_index.view(Z_enc.size(0),Z_enc.size(2),Z_enc.size(3)).data
+            Z_enc = Z_enc.data
 
         datas["Z"].append(Z_enc.detach().to(device))
         datas["id"].append(embedded_index.detach().to(device).long())
@@ -50,7 +54,7 @@ def create_pixel_cnn(args_model:Arguments):
                             kernel_size=args_CNN.kernel_size,
                             fm=args_CNN.fm)
         
-    elif args_model.dataset_name=="CIF10":
+    elif args_model.dataset_name=="CIFAR10":
         pixelcnn = PIXELCNN2D(k_dim=args_model.k_dim,
                             z_dim=args_model.z_dim,
                             kernel_size=args_CNN.kernel_size,
@@ -92,14 +96,25 @@ def train_CNN(args_model:Arguments, model_name:str,
 
 
 def show_generated(args:Arguments, sample):
+    B = sample.shape[0]
     if args.dataset_name=="MNIST":
-        B = sample.shape[0]
         images = sample.view(B,28,28)
         fig,axs = plt.subplots(B)
         for i in range(B):
             axs[i].imshow(images[i], cmap="gray")
             axs[i].axis("off")
         plt.show()
+
+    elif args.dataset_name=="CIFAR10":
+        sample = (sample+1)/2
+        images = sample.permute(0,2,3,1)
+        fig,axs = plt.subplots(B)
+        for i in range(B):
+            axs[i].imshow(images[i])
+            axs[i].axis("off")
+        plt.show()
+    
+
 
 
 
@@ -117,44 +132,46 @@ def generate_samples(args_model:Arguments, model_name,
     pixelcnn.eval()
 
     emb = solver.model.embd.weight
-    indices = torch.zeros(B, L, dtype=torch.long, device=device)
-    z_cur = torch.zeros(B, emb.size(1), L, device=device)
+    if args_model.dataset_name=="MNIST":
+        indices = torch.zeros(B, L, dtype=torch.long, device=device)
+        z_cur = torch.zeros(B, emb.size(1), L, device=device)
 
-    with torch.no_grad():
-        for t in range(L):
-            logits = pixelcnn(z_cur) #[B, k_dim, L]
-            logits_t = logits[:, :, t] / max(temperature, 1e-8) #[B, k_dim]
-            probs = F.softmax(logits_t, dim=1)  #[B, k_dim]
+        with torch.no_grad():
+            for t in range(L):
+                logits = pixelcnn(z_cur) #[B, k_dim, L]
+                logits_t = logits[:, :, t] / max(temperature, 1e-8) #[B, k_dim]
+                probs = F.softmax(logits_t, dim=1)  #[B, k_dim]
 
-            sampled = torch.multinomial(probs, num_samples=1).squeeze(1)  # [B]
-            indices[:, t] = sampled
-            z_cur[:, :, t] = emb[sampled].to(device) # [B, z_dim, L]
+                sampled = torch.multinomial(probs, num_samples=1).squeeze(1)  # [B]
+                indices[:, t] = sampled
+                z_cur[:, :, t] = emb[sampled].to(device) # [B, z_dim, L]
 
-        # Convert to decoder input according to vq_model decoder
-        if L == 1:
             z_dec_input = z_cur.squeeze(2)   # [B, z_dim]
             generated = solver.model.decode(z_dec_input)
-            show_generated(args_model, generated)
-            return generated, indices
+        
 
-        # Case B: decoder expects spatial grid. You must reshape z_cur into grid:
-        # e.g., if latent grid is (W, H) and L = W*H, we can reshape:
-        #   z_grid = z_cur.permute(0, 2, 1).view(B, H, W, D) -> then permute to desired order
-        # This depends on your VQ-VAE decoder type (conv vs MLP). If conv decoder:
-        #  z_grid = z_cur.permute(0, 2, 1).view(B, W, H, D).permute(0, 3, 1, 2) -> [B, D, W, H]
-        # Then pass to conv decoder: generated = vq_model.decode_from_grid(z_grid)
-        #
-        # I can't guess exact reshape — adapt below to your decoder expectation.
-        #
-        # Example (square grid):
-        L = z_cur.size(2)
-        side = int(L**0.5)
-        assert side*side == L, "L must be a square number for this example"
-        z_grid = z_cur.permute(0, 2, 1).view(B, side, side, z_dim).permute(0, 3, 1, 2)
-        # If your decoder can decode this:
-        generated = solver.model.decode_from_grid(z_grid)
-        return generated, indices
+    elif args_model.dataset_name=="CIFAR10":
+        z_dim = args_CNN.z_dim
 
+        sample,_ = next(iter(solver.data_loader))
+        Z_enc,_ = solver.model.forward_pixelCNN(sample.to(device))
+        _,_, Z_w, Z_h = Z_enc.size()
+
+        rand_idx = torch.multinomial(torch.rand(B*Z_w*Z_h, z_dim),1).squeeze().long().to(device)
+        rand_Z = emb[rand_idx].view(-1,Z_w,Z_h,z_dim).permute(0,3,1,2)
+        starting_point = 3,0
+        with torch.no_grad():
+            for i in range(Z_w):
+                for j in range(Z_h):
+                    if i < starting_point[0] or (i == starting_point[0] and j < starting_point[1]):
+                            continue
+                    logit = pixelcnn(rand_Z.detach())
+                    prob = F.softmax(logit).data
+                    idx = torch.multinomial(prob[:,:,i,j],1).squeeze()
+                    rand_Z[:,:,i,j] = emb[idx]
+        generated = solver.model.decode(rand_Z).detach()
+    
+    show_generated(args_model, generated)
 
 
 
@@ -174,3 +191,11 @@ args_CNN.modify(learning_rate=1e-3, kernel_size=3, fm=64, epoches=30)
 #generate_randomly(args_model, "MNIST_paper1", B=12)
 #train_CNN(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1")
 #generate_samples(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1", B=10)
+
+args_model = Arguments(dataset_name="CIFAR10",
+                 epoches=30, learning_rate=1e-4, batch_size=128, beta=0.25,
+                 k_dim=512, z_dim=64)
+args_CNN = args_model.copy()
+args_CNN.modify(learning_rate=1e-3, kernel_size=3, fm=64, epoches=3)
+#train_CNN(args_model,"CIFAR10_paper2", args_CNN, "CNN_CIFAR10")
+#generate_samples(args_model, "CIFAR10_paper2", args_CNN, "CNN_CIFAR10", B=4)

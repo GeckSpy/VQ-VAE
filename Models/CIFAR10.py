@@ -127,7 +127,7 @@ class MODEL_CIFAR10(nn.Module):
 
         return X_recon, Z_enc_ori, Z_dec, Z_enc_for_embd
     
-    def forward_pixel_cnn(self, x):
+    def forward_pixelCNN(self, x):
         Z_enc_ori = self.encode(x) # -> (B,C,W,H), C==z_dim
         z_bs, z_c, z_w, z_h = Z_enc_ori.size()
 
