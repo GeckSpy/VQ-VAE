@@ -23,7 +23,7 @@ def generate_randomly(args:Arguments, model_name, B=2):
 
     datas, _ = next(iter(solver.data_loader))
     data = datas[np.random.randint(0, datas.shape[0]-1, B)]
-    data = torch.rand(data.shape).to(device)
+    data = torch.randn(data.shape).to(device)
     
     datas_reconstructed, _, _, _ = solver.model(data)
     show_sample(data, datas_reconstructed.detach(), args.dataset_name, B)
@@ -99,7 +99,7 @@ def show_generated(args:Arguments, sample):
     B = sample.shape[0]
     if args.dataset_name=="MNIST":
         images = sample.view(B,28,28)
-        fig,axs = plt.subplots(B)
+        fig,axs = plt.subplots(1,B)
         for i in range(B):
             axs[i].imshow(images[i], cmap="gray")
             axs[i].axis("off")
@@ -108,7 +108,7 @@ def show_generated(args:Arguments, sample):
     elif args.dataset_name=="CIFAR10":
         sample = (sample+1)/2
         images = sample.permute(0,2,3,1)
-        fig,axs = plt.subplots(B)
+        fig,axs = plt.subplots(1,B)
         for i in range(B):
             axs[i].imshow(images[i])
             axs[i].axis("off")
@@ -188,9 +188,9 @@ args_model = Arguments(dataset_name="MNIST",
                  k_dim=128, z_dim=64)
 args_CNN = args_model.copy()
 args_CNN.modify(learning_rate=1e-3, kernel_size=3, fm=64, epoches=30)
-#generate_randomly(args_model, "MNIST_paper1", B=12)
+#generate_randomly(args_model, "MNIST_paper1", B=16)
 #train_CNN(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1")
-#generate_samples(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1", B=10)
+#generate_samples(args_model, "MNIST_paper1", args_CNN, "CNN_MNIST1", B=20)
 
 args_model = Arguments(dataset_name="CIFAR10",
                  epoches=30, learning_rate=1e-4, batch_size=128, beta=0.25,
@@ -198,4 +198,4 @@ args_model = Arguments(dataset_name="CIFAR10",
 args_CNN = args_model.copy()
 args_CNN.modify(learning_rate=1e-3, kernel_size=3, fm=64, epoches=3)
 #train_CNN(args_model,"CIFAR10_paper2", args_CNN, "CNN_CIFAR10")
-#generate_samples(args_model, "CIFAR10_paper2", args_CNN, "CNN_CIFAR10", B=4)
+#generate_samples(args_model, "CIFAR10_paper2", args_CNN, "CNN_CIFAR10", B=10)
