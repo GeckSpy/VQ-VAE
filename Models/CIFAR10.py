@@ -27,7 +27,7 @@ class res_block(nn.Module):
     def weight_init(self):
         for ms in self._modules:
             if isinstance(self._modules[ms],nn.Conv2d):
-                nn.init.kaiming_normal(self._modules[ms].weight)
+                nn.init.kaiming_normal_(self._modules[ms].weight)
                 try : self._modules[ms].bias.data.fill_(0)
                 except : pass
 
@@ -106,7 +106,7 @@ class MODEL_CIFAR10(nn.Module):
                 continue
             for m in self._modules[ms]:
                 if isinstance(m,nn.Conv2d):
-                    nn.init.kaiming_normal(m.weight)
+                    nn.init.kaiming_normal_(m.weight)
                     try:m.bias.data.fill_(0)
                     except:pass
 
