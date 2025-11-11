@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 class MNIST_paper(nn.Module):
     # same architecture than paper
@@ -46,7 +44,7 @@ class MNIST_paper(nn.Module):
         Q = query.unsqueeze(1).repeat(1,target.size(0),1) # Copy 
         T = target.unsqueeze(0).repeat(query.size(0),1,1) # Copy
         distances = (Q-T).pow(2).sum(2) # computes all pairwise distances
-        index = distances.min(1)[1] # .min() resturn (min, indices)
+        index = distances.min(1)[1] # .min() resturn (min indices)
         if return_index:
             return index
         else:
@@ -55,7 +53,7 @@ class MNIST_paper(nn.Module):
 
     def hook(self, grad):
         """
-        Used for gradient hanfling trick
+        Used for gradient handling trick
         """
         self.grad_for_encoder = grad
         return grad
@@ -66,8 +64,8 @@ class MNIST_paper(nn.Module):
         X: Pytorch tensor or batch_size x MNIST_size(28x28)
         """
         Z_enc = self.encode(X.view(-1, 784)) # Flatten X and encode it
-        Z_emb = self.find_nearest(Z_enc, self.embd.weight)
-        Z_emb.register_hook(self.hook)# For gradient handling trick
+        Z_emb = self.find_nearest(Z_enc, self.embd.weight) # Nearest-neighbor lookup
+        Z_emb.register_hook(self.hook) # For gradient handling trick
 
         X_recons = self.decode(Z_emb).view(-1, 1, 28, 28)
         Z_enc_for_emb = self.find_nearest(self.embd.weight, Z_enc) # update embedding vectors

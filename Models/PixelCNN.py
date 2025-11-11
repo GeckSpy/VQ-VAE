@@ -4,7 +4,7 @@ backends.cudnn.benchmark = True
 
 
 class MaskedConv2d(nn.Conv2d):
-    ''' This code is from based on: https://github.com/jzbontar/pixelcnn-pytorch '''
+    ''' This code is from: https://github.com/jzbontar/pixelcnn-pytorch '''
     def __init__(self, mask_type, *args, **kwargs):
         super(MaskedConv2d, self).__init__(*args, **kwargs)
         assert mask_type in {'A', 'B'}
@@ -19,6 +19,7 @@ class MaskedConv2d(nn.Conv2d):
         return super(MaskedConv2d, self).forward(x)
     
 class MaskedConv1d(nn.Conv1d):
+    """1d version of MaskedConv"""
     def __init__(self, mask_type, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert mask_type in {'A', 'B'}
@@ -38,6 +39,7 @@ class MaskedConv1d(nn.Conv1d):
 
 
 class PixelCNN1D(nn.Module):
+    """1D Pixel CNN architecture"""
     def __init__(self, k_dim, z_dim, fm=64, kernel_size=5):
         super().__init__()
         self.k_dim = k_dim
@@ -65,7 +67,7 @@ class PixelCNN1D(nn.Module):
 
 
 class PIXELCNN2D(nn.Module):
-    ''' This code is from based on: https://github.com/jzbontar/pixelcnn-pytorch '''
+    ''' This code is from: https://github.com/jzbontar/pixelcnn-pytorch '''
     # 1 chanel PixelCNN
     def __init__(self, k_dim, z_dim, kernel_size=3, fm=32):
         super(PIXELCNN2D, self).__init__()

@@ -1,5 +1,4 @@
 """Code based on https://github.com/1Konny/VQ-VAE/utils/model_cifar10.py"""
-
 import torch.nn as nn
 import math
 

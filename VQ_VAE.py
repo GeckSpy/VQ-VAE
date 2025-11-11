@@ -11,10 +11,9 @@ from Models.CIFAR10 import MODEL_CIFAR10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-
-
 #________________ Solver Class ________________________________
 class Solver:
+    """Solver class inspired by the one of the paper."""
     def __init__(self, args:Arguments):
         self.args:Arguments = args.copy()
 
@@ -23,7 +22,7 @@ class Solver:
         elif self.args.dataset_name == "CIFAR10":
             self.model = MODEL_CIFAR10(k_dim=args.k_dim, z_dim=args.z_dim)
         else:
-            assert ValueError("dataset " + self.args.dataset_name + " is not supported.")
+            assert ValueError("dataset " + self.args.dataset_name + " is not supported yet.")
         self.model.to(device)
 
         self.loss = nn.MSELoss().to(device)
@@ -71,8 +70,6 @@ class Solver:
 
 
 
-
-
 def save_model(path, model, optimizer=None, epoch=None, extra=None):
     """Save state dict and optimizer (optional)."""
     root = "./saves"
@@ -98,7 +95,7 @@ def load_model(path_init, model, optimizer=None, device=None):
     return epoch
 
 
-# ______________________________
+# _________________________________________________
 
 def train_model(args:Arguments, model_name, save=True):
     """Train a model"""
@@ -109,6 +106,7 @@ def train_model(args:Arguments, model_name, save=True):
     
 
 def show_sample(sample, reconstruction, dataset_name, K=2):
+    """Show the samples"""
     def correct_sample(sample):
         if dataset_name=="MNIST":
             return sample[0]
@@ -119,13 +117,11 @@ def show_sample(sample, reconstruction, dataset_name, K=2):
                 result[:,:,k] = sample[k,:,:]
             return (result+1)/2
 
-
     if dataset_name=="MNIST" or dataset_name=="CIFAR10":
         cmap="gray" if dataset_name=="MNIST" else "viridis"
-
         fig, axs = plt.subplots(2,K)
         fig.subplots_adjust(hspace=-0.5, wspace=0.1)
-        
+
         for k in range(K):
             axs[0,k].imshow(correct_sample(sample[k]), cmap=cmap)
             axs[1,k].imshow(correct_sample(reconstruction[k]), cmap=cmap)
@@ -147,6 +143,7 @@ def test_model(args:Arguments, model_name, K=1):
 
 
 
+# __________________ Examples _______________________
 args = Arguments(dataset_name="MNIST",
                  epoches=30, learning_rate=1e-4, batch_size=100, beta=0.1,
                  k_dim=128, z_dim=64)
